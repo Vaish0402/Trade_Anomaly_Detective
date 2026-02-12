@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 from datetime import datetime
+import sys
 
 # Page configuration for a professional look
 st.set_page_config(page_title="Trade Anomaly Dashboard", layout="wide", initial_sidebar_state="expanded")
@@ -30,14 +31,14 @@ with st.sidebar:
         with st.spinner("Executing pipeline layers..."):
             # Execute the orchestrator script
             try:
-                result = subprocess.run(["python", "src/report_generator.py"], capture_output=True, text=True)
+                result = subprocess.run([sys.executable, "src/report_generator.py"], capture_output=True, text=True)
                 if result.returncode == 0:
                     st.success("Analysis Complete!")
                     st.rerun()
                 else:
                     st.error(f"Error: {result.stderr}")
             except Exception as e:
-                st.error(f"Failed to run script: {e}")
+                st.error(f"system error: {e}")
 
     st.divider()
     st.subheader("System Status")
