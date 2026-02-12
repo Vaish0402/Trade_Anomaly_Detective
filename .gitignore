@@ -1,0 +1,10 @@
+# Secrets
+.env
+
+# Python folders
+__pycache__/
+venv/
+.ipynb_checkpoints/
+
+# System files
+.DS_Store

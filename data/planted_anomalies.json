@@ -1,0 +1,22 @@
+[
+    {
+        "shipment_id": "SHIP_1010",
+        "category": "Math Inconsistency",
+        "description": "Total FOB does not match quantity x unit price"
+    },
+    {
+        "shipment_id": "SHIP_1025",
+        "category": "Compliance Risk",
+        "description": "Freight cost is zero for CIF incoterm"
+    },
+    {
+        "shipment_id": "SHIP_1050",
+        "category": "Price Anomaly",
+        "description": "Unit price is 50x the catalog average"
+    },
+    {
+        "shipment_id": "SHIP_1075",
+        "category": "Classification Error",
+        "description": "HS Code for Laptops assigned to Cotton T-shirts"
+    }
+]

@@ -1,0 +1,26 @@
+{
+  "provider": "Groq",
+  "model": "llama-3.3-70b-versatile",
+  "total_calls": 72,
+  "total_tokens": {
+    "input": 4292,
+    "output": 7093,
+    "total": 11385
+  },
+  "estimated_cost_usd": 0.006717150000000001,
+  "breakdown_by_task": {
+    "hs_code_validation": {
+      "calls": 72,
+      "tokens": 11385,
+      "description": "Validating HS codes match product descriptions"
+    },
+    "executive_summary": {
+      "calls": 0,
+      "tokens": 0,
+      "description": "Generating executive summary from anomaly report"
+    }
+  },
+  "avg_latency_ms": 2050.6674349308014,
+  "timestamp": "2026-02-12T19:41:23.036639Z",
+  "notes": ""
+}
