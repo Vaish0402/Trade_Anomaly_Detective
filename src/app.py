@@ -27,7 +27,7 @@ with st.sidebar:
     st.header(" Pipeline Controls")
     st.info("Trigger the 3-layer detection engine (Rules, Statistical, and LLM).")
     
-    if st.button(" Run Analysis", use_container_width=True):
+    if st.button(" Run Analysis", width='stretch'):
         with st.spinner("Executing pipeline layers..."):
             # Execute the orchestrator script
             try:
@@ -91,7 +91,7 @@ if anomalies:
             filtered_df = filtered_df[filtered_df['shipment_id'].str.contains(search, case=False)]
 
         # Display Sortable Table
-        st.dataframe(filtered_df[['shipment_id', 'category', 'type', 'severity']], use_container_width=True, hide_index=True)
+        st.dataframe(filtered_df[['shipment_id', 'category', 'type', 'severity']], width='stretch', hide_index=True)
 
         # Expanding Details Section
         st.subheader("Detailed Evidence Viewer")
