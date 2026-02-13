@@ -15,34 +15,34 @@
     },
     {
         "shipment_id": "SHIP_1010",
-        "category": "Statistical",
-        "type": "Unit Price Outlier",
-        "evidence": "Value 11.42 is outside expected bounds [4.90, 6.10]",
-        "severity": "High",
-        "impact": "Significant deviation in unit price may indicate fraud or inefficiency."
+        "category": "Classification",
+        "type": "HS Code Mismatch",
+        "layer": "llm",
+        "evidence": "Insufficient product information",
+        "severity": "High"
     },
     {
         "shipment_id": "SHIP_1025",
-        "category": "Statistical",
-        "type": "Unit Price Outlier",
-        "evidence": "Value 12.34 is outside expected bounds [4.90, 6.10]",
-        "severity": "High",
-        "impact": "Significant deviation in unit price may indicate fraud or inefficiency."
+        "category": "Classification",
+        "type": "HS Code Mismatch",
+        "layer": "llm",
+        "evidence": "HS code 691310 is for ceramic sinks, and the product is unknown",
+        "severity": "High"
     },
     {
         "shipment_id": "SHIP_1050",
-        "category": "Statistical",
-        "type": "Unit Price Outlier",
-        "evidence": "Value 250.0 is outside expected bounds [4.90, 6.10]",
-        "severity": "High",
-        "impact": "Significant deviation in unit price may indicate fraud or inefficiency."
+        "category": "Classification",
+        "type": "HS Code Mismatch",
+        "layer": "llm",
+        "evidence": "Insufficient product information to verify HS code 610910",
+        "severity": "High"
     },
     {
         "shipment_id": "SHIP_1075",
-        "category": "Statistical",
-        "type": "Unit Price Outlier",
-        "evidence": "Value 22.5 is outside expected bounds [4.90, 6.10]",
-        "severity": "High",
-        "impact": "Significant deviation in unit price may indicate fraud or inefficiency."
+        "category": "Classification",
+        "type": "HS Code Mismatch",
+        "layer": "llm",
+        "evidence": "Insufficient product information to verify HS code accuracy",
+        "severity": "Medium"
     }
 ]
