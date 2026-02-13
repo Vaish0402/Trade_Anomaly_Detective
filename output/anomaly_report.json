@@ -44,37 +44,5 @@
         "evidence": "Value 22.5 is outside expected bounds [4.90, 6.10]",
         "severity": "High",
         "impact": "Significant deviation in unit price may indicate fraud or inefficiency."
-    },
-    {
-        "shipment_id": "SHIP_1010",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "HS Code 691310 corresponds to ceramic tableware, which does not match the product 'Unknown'",
-        "severity": "High"
-    },
-    {
-        "shipment_id": "SHIP_1025",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "HS Code 691310 corresponds to ceramic tableware, which does not match with the product being unknown",
-        "severity": "high"
-    },
-    {
-        "shipment_id": "SHIP_1050",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "HS Code 610910 is for 'T-shirts, singlets and other vests, of cotton, knitted or crocheted', but product is unknown",
-        "severity": "high"
-    },
-    {
-        "shipment_id": "SHIP_1075",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "Insufficient information to verify HS Code 847130 for an unknown product",
-        "severity": "high"
     }
 ]
