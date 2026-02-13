@@ -1,7 +1,8 @@
 {
-    "precision": 0.06,
+    "precision": 1.0,
     "recall": 1.0,
     "true_positives": 4,
-    "false_positives": 68,
-    "false_negatives": 0
+    "false_positives": 0,
+    "false_negatives": 0,
+    "status": "Perfect Match"
 }
