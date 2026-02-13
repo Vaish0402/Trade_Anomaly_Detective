@@ -1,71 +1,147 @@
 import pandas as pd
 
+
 class RuleEngine:
+    """
+    Layer 1: Deterministic Rule-Based Detection
+    No ML. No LLM. Pure business logic.
+    """
+
     def __init__(self, shipments_df):
-        # Define the exact planted IDs to isolate
-        self.planted_ids = ["SHIP_1010", "SHIP_1025", "SHIP_1050", "SHIP_1075"]
-        
-        # Filter immediately to prevent processing background noise
-        self.df = shipments_df[shipments_df['shipment_id'].isin(self.planted_ids)].copy()
+        """
+        shipments_df: Can be full dataset or pre-filtered subset.
+        """
+        self.df = shipments_df.copy()
         self.anomalies = []
 
+    # ==========================================================
+    # ENTRY POINT
+    # ==========================================================
     def run_all_checks(self):
-        """Entry point called by ReportGenerator to trigger all rules."""
-        self.check_math_consistency()
-        self.check_cif_freight()
-        self.check_drawback_status()
-        self.check_payment_logic()
+
+        self.check_math_validation()
+        self.check_drawback_violation()
+        self.check_payment_integrity()
+        self.check_cif_freight_logic()
+        self.check_insurance_sanity()
+
         return self.anomalies
 
-    def check_math_consistency(self):
-        """Total FOB must equal Quantity x Unit Price."""
-        # Using a small tolerance for floating point math
-        mask = abs(self.df['total_fob'] - (self.df['quantity'] * self.df['unit_price'])) > 0.01
-        inconsistent = self.df[mask]
-        for _, row in inconsistent.iterrows():
+    # ==========================================================
+    # 1️⃣ total_fob ≠ quantity × unit_price
+    # ==========================================================
+    def check_math_validation(self):
+
+        tolerance = 0.01  # float tolerance
+
+        mask = abs(
+            self.df["total_fob"] -
+            (self.df["quantity"] * self.df["unit_price"])
+        ) > tolerance
+
+        for _, row in self.df[mask].iterrows():
             self.anomalies.append({
-                "shipment_id": row['shipment_id'],
+                "shipment_id": row["shipment_id"],
                 "category": "Rule-Based",
-                "type": "Math Error",
-                "evidence": f"FOB {row['total_fob']} != {row['quantity']} * {row['unit_price']}",
-                "severity": "High"
+                "type": "Math Validation Error",
+                "layer": "rule",
+                "evidence": f"FOB={row['total_fob']} ≠ {row['quantity']}×{row['unit_price']}",
+                "severity": "High",
+                "impact": "Financial misstatement or invoice manipulation"
             })
 
-    def check_cif_freight(self):
-        """CIF means Cost, Insurance, and Freight; Seller MUST pay freight."""
-        mask = (self.df['incoterm'] == 'CIF') & (self.df['freight_cost'] <= 0)
-        violations = self.df[mask]
-        for _, row in violations.iterrows():
-            self.anomalies.append({
-                "shipment_id": row['shipment_id'],
-                "category": "Rule-Based",
-                "type": "Incoterm Violation",
-                "evidence": "Incoterm is CIF but freight_cost is 0",
-                "severity": "Medium"
-            })
+    # ==========================================================
+    # 2️⃣ drawback claimed when customs rejected
+    # ==========================================================
+    def check_drawback_violation(self):
 
-    def check_drawback_status(self):
-        """Duty drawback cannot be claimed if customs rejected the shipment."""
-        mask = (self.df['customs_status'] == 'rejected') & (self.df['drawback_amount'] > 0)
-        violations = self.df[mask]
-        for _, row in violations.iterrows():
+        mask = (
+            (self.df["customs_status"] == "rejected") &
+            (self.df["drawback_amount"] > 0)
+        )
+
+        for _, row in self.df[mask].iterrows():
             self.anomalies.append({
-                "shipment_id": row['shipment_id'],
+                "shipment_id": row["shipment_id"],
                 "category": "Rule-Based",
-                "type": "Compliance Risk",
+                "type": "Illegal Drawback Claim",
+                "layer": "rule",
                 "evidence": "Drawback claimed on rejected shipment",
-                "severity": "High"
+                "severity": "High",
+                "impact": "Regulatory violation and potential fraud"
             })
 
-    def check_payment_logic(self):
-        """Payment received status requires a valid 'days_to_payment' value."""
-        mask = (self.df['payment_status'] == 'received') & (self.df['days_to_payment'].isna())
-        violations = self.df[mask]
-        for _, row in violations.iterrows():
+    # ==========================================================
+    # 3️⃣ payment_status = received but days_to_payment is null
+    # ==========================================================
+    def check_payment_integrity(self):
+
+        mask = (
+            (self.df["payment_status"] == "received") &
+            (self.df["days_to_payment"].isna())
+        )
+
+        for _, row in self.df[mask].iterrows():
             self.anomalies.append({
-                "shipment_id": row['shipment_id'],
+                "shipment_id": row["shipment_id"],
                 "category": "Rule-Based",
-                "type": "Data Integrity",
-                "evidence": "Status is 'received' but days_to_payment is null",
-                "severity": "Low"
+                "type": "Payment Data Integrity Issue",
+                "layer": "rule",
+                "evidence": "Payment marked received but days_to_payment is NULL",
+                "severity": "Medium",
+                "impact": "Incomplete financial tracking"
             })
+
+    # ==========================================================
+    # 4️⃣ freight_cost = 0 when incoterm = CIF
+    # ==========================================================
+    def check_cif_freight_logic(self):
+
+        mask = (
+            (self.df["incoterm"] == "CIF") &
+            (self.df["freight_cost"] <= 0)
+        )
+
+        for _, row in self.df[mask].iterrows():
+            self.anomalies.append({
+                "shipment_id": row["shipment_id"],
+                "category": "Rule-Based",
+                "type": "CIF Freight Violation",
+                "layer": "rule",
+                "evidence": "CIF requires seller-paid freight but freight_cost is 0",
+                "severity": "Medium",
+                "impact": "Contractual non-compliance"
+            })
+
+    # ==========================================================
+    # 5️⃣ Insurance sanity check against FOB value
+    #
+    # Assumption:
+    # Insurance should typically be between 0.5% and 5% of FOB
+    # ==========================================================
+    def check_insurance_sanity(self):
+
+        if "insurance_amount" not in self.df.columns:
+            return  # Skip if column not present
+
+        lower_bound = 0.005
+        upper_bound = 0.05
+
+        for _, row in self.df.iterrows():
+
+            if row["insurance_amount"] <= 0:
+                continue
+
+            ratio = row["insurance_amount"] / row["total_fob"]
+
+            if ratio < lower_bound or ratio > upper_bound:
+
+                self.anomalies.append({
+                    "shipment_id": row["shipment_id"],
+                    "category": "Rule-Based",
+                    "type": "Insurance Value Anomaly",
+                    "layer": "rule",
+                    "evidence": f"Insurance ratio={round(ratio,4)} outside expected range (0.5%-5%)",
+                    "severity": "Medium",
+                    "impact": "Possible under/over insurance risk exposure"
+                })

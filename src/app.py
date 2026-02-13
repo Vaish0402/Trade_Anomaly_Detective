@@ -2,152 +2,225 @@ import streamlit as st
 import pandas as pd
 import json
 import os
-import subprocess
-from datetime import datetime
-import sys
+from report_generator import ReportGenerator
 
-# Page configuration for a professional look
-st.set_page_config(page_title="Trade Anomaly Dashboard", layout="wide", initial_sidebar_state="expanded")
+OUTPUT_DIR = "output"
 
-# --- HELPER FUNCTIONS ---
+st.set_page_config(
+    page_title="Trade Anomaly Dashboard",
+    layout="wide"
+)
+
+# ==========================================================
+# RUN ANALYSIS BUTTON
+# ==========================================================
+
+st.sidebar.title("Controls")
+
+if st.sidebar.button("🚀 Run Analysis"):
+
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    def progress_callback(percent, message):
+        progress_bar.progress(percent)
+        status_text.text(message)
+
+    rg = ReportGenerator()
+
+    rg.run_pipeline_with_progress(progress_callback)
+
+    progress_bar.progress(100)
+    status_text.text("✅ Analysis Completed")
+
+    st.success("Pipeline execution finished.")
+
+
+# ==========================================================
+# LOAD DATA
+# ==========================================================
+
 def load_json(path):
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             return json.load(f)
     return None
 
-def load_markdown(path):
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            return f.read()
-    return "Click 'Run Analysis' to generate the executive summary."
 
-# --- SIDEBAR: CONTROL PANEL ---
-with st.sidebar:
-    st.header("Pipeline Controls")
-    st.info("Trigger the targeted 3-layer detection engine (Rules, Statistical, and LLM) for the 4 planted anomalies.")
-    
-    if st.button("Run Analysis", use_container_width=True):
-        with st.spinner("Executing targeted pipeline layers..."):
-            try:
-                # Run the orchestrator script
-                # Note: Ensure src/report_generator.py is the path to your script
-                result = subprocess.run([sys.executable, "src/report_generator.py"], capture_output=True, text=True)
-                
-                if result.returncode == 0:
-                    st.success("Analysis Complete!")
-                    st.rerun()
-                else:
-                    st.error("Pipeline failed.")
-                    st.code(result.stderr)
-            except Exception as e:
-                st.error(f"System error: {e}")
+anomaly_report = load_json(os.path.join(OUTPUT_DIR, "anomaly_report.json"))
+accuracy_report = load_json(os.path.join(OUTPUT_DIR, "accuracy_report.json"))
+usage_report = load_json(os.path.join(OUTPUT_DIR, "llm_usage_report.json"))
 
-    st.divider()
-    st.subheader("System Status")
-    st.write(f"**Target Audit Mode:** `PLANTED_IDS ONLY`")
-    st.write(f"**Last Sync:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+# ==========================================================
+# DASHBOARD HEADER
+# ==========================================================
 
-# --- DATA LOADING ---
-# Ensure these paths match your ReportGenerator output_dir
-anomalies = load_json('output/anomaly_report.json')
-accuracy = load_json('output/accuracy_report.json')
-# usage is optional based on your recent change to remove it
-usage = load_json('output/usage_report.json') 
-summary_md = load_markdown('output/executive_summary.md')
+st.title("📦 Trade Shipment Anomaly Dashboard")
 
-# --- DASHBOARD HEADER ---
-st.title("🛡️ Trade Shipment Anomaly Detective")
-st.markdown("Automated surveillance focusing on **Planted Test Cases** for Pricing, Compliance, and HS Code risks.")
+if not anomaly_report:
+    st.warning("Run analysis to generate results.")
+    st.stop()
 
-if anomalies:
-    df = pd.DataFrame(anomalies)
+anomalies = anomaly_report.get("anomalies", [])
 
-    # --- KPI METRICS ---
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        # Total rows in the full dataset (as defined in your earlier prompt)
-        st.metric("Total Shipments", "250") 
-    with col2:
-        st.metric("Anomalies Caught", len(df))
-    with col3:
-        # Filter for high severity
-        high_sev = len(df[df['severity'].astype(str).str.upper() == 'HIGH'])
-        st.metric("High Severity", high_sev)
-    with col4:
-        if accuracy:
-            # Displays the recall from your accuracy_report.json
-            st.metric("Audit Accuracy", f"{int(accuracy['recall'] * 100)}%")
+df = pd.DataFrame(anomalies)
 
-    st.divider()
+# ==========================================================
+# SUMMARY STATS
+# ==========================================================
 
-    # --- MAIN CONTENT TABS ---
-    tab1, tab2, tab3 = st.tabs(["📊 Anomaly Explorer", "📝 Executive Summary", "⚙️ System Metrics"])
+st.subheader("📊 Summary Overview")
 
-    with tab1:
-        st.subheader("Targeted Anomaly Table")
-        
-        # Table Filters
-        c1, c2 = st.columns([2, 1])
-        with c1:
-            search = st.text_input("Search Shipment ID (e.g., SHIP_1010)", "")
-        with c2:
-            cat_list = df['category'].unique().tolist()
-            cat_filter = st.multiselect("Filter Category", cat_list, default=cat_list)
-        
-        # Filtering logic
-        filtered_df = df[df['category'].isin(cat_filter)]
-        if search:
-            filtered_df = filtered_df[filtered_df['shipment_id'].str.contains(search, case=False)]
+col1, col2, col3, col4 = st.columns(4)
 
-        # Display Sortable Table
-        st.dataframe(filtered_df[['shipment_id', 'category', 'type', 'severity']], use_container_width=True, hide_index=True)
+shipments_path = os.path.join("data", "shipments.csv")
 
-        # Expanding Details Section
-        st.divider()
-        st.subheader("Evidence Viewer")
-        if not filtered_df.empty:
-            selected_id = st.selectbox("Select Shipment for Forensic Details:", filtered_df['shipment_id'].unique())
-            
-            if selected_id:
-                detail = df[df['shipment_id'] == selected_id].iloc[0]
-                d_col1, d_col2 = st.columns(2)
-                with d_col1:
-                    st.write(f"**Category:** {detail['category']}")
-                    st.write(f"**Anomaly Type:** {detail['type']}")
-                    st.error(f"**Severity:** {detail['severity']}")
-                with d_col2:
-                    evidence = detail.get('evidence', "No evidence provided.")
-                    st.write("**Evidence Detail:**")
-                    if isinstance(evidence, dict):
-                        st.json(evidence)
-                    else:
-                        st.info(evidence)
-                
-                # Recommendation logic
-                rec = detail.get('recommendation', "Immediate audit of trade documents required.")
-                st.markdown(f" **Recommendation:** {rec}")
-        else:
-            st.info("No anomalies match the current filters.")
-
-    with tab2:
-        st.subheader("Operational Briefing")
-        st.markdown(summary_md)
-
-    with tab3:
-        st.subheader("Technical Performance")
-        col_acc1, col_acc2 = st.columns(2)
-        with col_acc1:
-            if accuracy:
-                st.write("**Detection Accuracy (vs Ground Truth)**")
-                st.json(accuracy)
-        with col_acc2:
-            if usage:
-                st.write("**LLM Usage Tracking**")
-                st.json(usage)
-            else:
-                st.info("Usage tracking is currently disabled in the pipeline.")
-
+if os.path.exists(shipments_path):
+    total_shipments = len(pd.read_csv(shipments_path))
 else:
-    st.warning("⚠️ No analysis data found. Please click 'Run Analysis' in the sidebar to start the detection pipeline.")
-    st.image("https://via.placeholder.com/800x200.png?text=Waiting+for+Pipeline+Execution", use_column_width=True)
+    total_shipments = 0
+  
+total_anomalies = len(df)
+
+severity_counts = df["severity"].value_counts().to_dict() if not df.empty else {}
+category_counts = df["category"].value_counts().to_dict() if not df.empty else {}
+
+col1.metric("Total Shipments", total_shipments)
+col2.metric("Total Anomalies", total_anomalies)
+col3.metric("Highest Risk Score", anomaly_report.get("highest_risk_score", 0))
+col4.metric("LLM Calls", usage_report.get("total_llm_calls", 0) if usage_report else 0)
+
+
+import altair as alt
+# ==========================================================
+# SEVERITY BREAKDOWN
+# ==========================================================
+
+st.subheader("⚠ Severity Breakdown")
+
+if not df.empty:
+    severity_df = df["severity"].value_counts().reset_index()
+    severity_df.columns = ["severity", "count"]
+
+    chart = (
+        alt.Chart(severity_df)
+        .mark_bar(color="#4c78a8", cornerRadiusTopLeft=9, cornerRadiusTopRight=9)
+        .encode(
+            x=alt.X("severity:N", title="Severity Level"),
+            y=alt.Y("count:Q", title="Number of Anomalies"),
+            tooltip=["severity", "count"]
+        )
+        .properties(width=600, height=400)
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+
+
+
+# ==========================================================
+# CATEGORY BREAKDOWN (Pie Chart)
+# ==========================================================
+import altair as alt
+st.subheader("📂 Anomalies by Category")
+
+if not df.empty:
+    category_df = df["category"].value_counts().reset_index()
+    category_df.columns = ["category", "count"]
+
+    chart = (
+        alt.Chart(category_df)
+        .mark_arc(innerRadius=0)
+        .encode(
+            theta=alt.Theta(field="count", type="quantitative"),
+            color=alt.Color(field="category", type="nominal", legend=alt.Legend(title="Category")),
+            tooltip=["category", "count"]
+        )
+        .properties(width=400, height=400)
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+
+# ==========================================================
+# ANOMALY TABLE
+# ==========================================================
+
+st.subheader("📋 Anomaly Table")
+
+if not df.empty:
+
+    filter_severity = st.selectbox(
+        "Filter by Severity",
+        ["All"] + sorted(df["severity"].unique())
+    )
+
+    filtered_df = df.copy()
+
+    if filter_severity != "All":
+        filtered_df = filtered_df[filtered_df["severity"] == filter_severity]
+
+    st.dataframe(
+        filtered_df.sort_values(by="risk_score", ascending=False),
+        use_container_width=True
+    )
+
+    # ======================================================
+    # CLICK TO VIEW DETAILS
+    # ======================================================
+
+    st.subheader("🔍 View Anomaly Details")
+
+    selected_id = st.selectbox(
+        "Select Shipment ID",
+        filtered_df["shipment_id"].unique()
+    )
+
+    selected_row = filtered_df[filtered_df["shipment_id"] == selected_id].iloc[0]
+
+    st.markdown(f"""
+### Shipment ID: {selected_row['shipment_id']}
+
+**Type:** {selected_row['type']}  
+**Category:** {selected_row['category']}  
+**Severity:** {selected_row['severity']}  
+**Risk Score:** {selected_row['risk_score']}  
+**Priority:** {selected_row['priority']}  
+
+---
+
+### Evidence
+{selected_row['evidence']}
+""")
+
+# ==========================================================
+# EXECUTIVE SUMMARY
+# ==========================================================
+
+st.subheader("📄 Executive Summary")
+
+summary_path = os.path.join(OUTPUT_DIR, "executive_summary.md")
+
+if os.path.exists(summary_path):
+    with open(summary_path, "r") as f:
+        st.markdown(f.read())
+else:
+    st.info("No summary generated yet.")
+
+# ==========================================================
+# ACCURACY REPORT
+# ==========================================================
+
+st.subheader("🎯 Detection Accuracy")
+
+if accuracy_report:
+    st.json(accuracy_report)
+
+# ==========================================================
+# LLM USAGE REPORT
+# ==========================================================
+
+st.subheader("🤖 LLM Usage Report")
+
+if usage_report:
+    st.json(usage_report)
