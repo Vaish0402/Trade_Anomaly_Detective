@@ -62,30 +62,57 @@ class LLMDetector:
         self.model = "llama-3.3-70b-versatile"
 
     def _validate_single_shipment(self, row: Dict) -> Dict:
-        """Analyzes a single row for HS code correctness."""
-        # FIX: Check for 'product' key which is standard in your report
+    #   """Analyzes a single row for HS code correctness."""
+
         product_name = row.get('product', row.get('product_description', 'Unknown'))
         hs_code = row.get('hs_code', 'Unknown')
-        
-        product_name = row.get('product', row.get('product_description', 'Unknown'))
-        prompt = f"Product: {product_name}, HS Code: {row.get('hs_code', 'Unknown')}..."
+
+        prompt = f"""
+    You are a trade classification expert.
+
+    Evaluate whether the following HS code correctly classifies the product.
+
+    Product: {product_name}
+    HS Code: {hs_code}
+
+    Respond ONLY in valid JSON format like this:
+
+    {{
+    "is_mismatch": true or false,
+    "reason": "short explanation",
+    "severity": "Low/Medium/High"
+    }}
+    """
+
         start_time = time.time()
+
         try:
             completion = self.client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You must respond strictly in JSON format."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
                 model=self.model,
                 response_format={"type": "json_object"}
             )
+
             latency = (time.time() - start_time) * 1000
-            
+
             usage_tracker.log(
                 task="hs_code_validation",
                 input_tokens=completion.usage.prompt_tokens,
                 output_tokens=completion.usage.completion_tokens,
                 latency_ms=latency
             )
-            
+
             res = json.loads(completion.choices[0].message.content)
+
             if res.get("is_mismatch"):
                 return {
                     "shipment_id": row['shipment_id'],
@@ -95,9 +122,12 @@ class LLMDetector:
                     "evidence": res.get("reason"),
                     "severity": res.get("severity", "High")
                 }
+
         except Exception as e:
             print(f"LLM Error for {row.get('shipment_id')}: {e}")
+
         return None
+
 
     def detect_hs_code_mismatch(self, shipments_to_check: List[Dict], catalog_df=None) -> List[Dict]:
         """Filters and processes only the target shipments."""
@@ -116,7 +146,17 @@ class LLMDetector:
         start_time = time.time()
         try:
             completion = self.client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
+                messages = [
+                    {
+                    "role": "system",
+                    "content": "You are a trade compliance expert. Always respond in valid JSON format."
+                },
+                {
+                    "role": "user",
+                    "content": f"{prompt}\n\nReturn your answer strictly in JSON."
+             }
+        ]
+,
                 model=self.model
             )
             usage_tracker.log(
