@@ -1,26 +1,18 @@
 {
-  "provider": "Groq",
-  "model": "llama-3.3-70b-versatile",
-  "total_calls": 70,
-  "total_tokens": {
-    "input": 15971,
-    "output": 7370,
-    "total": 23341
-  },
-  "estimated_cost_usd": 0.013771190000000003,
-  "breakdown_by_task": {
-    "hs_code_validation": {
-      "calls": 69,
-      "tokens": 11011,
-      "description": "Validating HS codes match product descriptions"
+    "provider": "Groq",
+    "model": "llama-3.3-70b-versatile",
+    "total_llm_calls": 3,
+    "token_usage": {
+        "input": 1418,
+        "output": 263,
+        "total": 1681
     },
-    "executive_summary": {
-      "calls": 1,
-      "tokens": 12330,
-      "description": "Generating executive summary from anomaly report"
-    }
-  },
-  "avg_latency_ms": 3191.7170694896154,
-  "timestamp": "2026-02-12T20:15:22.257631Z",
-  "notes": "Error ID SHIP_1018: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8tdj8te1b8vh3krfm7ynfy` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'requests', 'code': 'rate_limit_exceeded'}}; Error ID SHIP_1025: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8tdj8te1b8vh3krfm7ynfy` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'requests', 'code': 'rate_limit_exceeded'}}; Error ID SHIP_1039: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8tdj8te1b8vh3krfm7ynfy` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'requests', 'code': 'rate_limit_exceeded'}}; "
+    "breakdown_by_task": {
+        "hs_code_validation": 2,
+        "executive_summary": 1,
+        "buyer_pattern_analysis": 0
+    },
+    "average_latency_ms": 910.01,
+    "timestamp": "2026-02-13T20:57:01.856224Z",
+    "notes": "LLM only processes suspicious rows from Layer 1 & 2."
 }

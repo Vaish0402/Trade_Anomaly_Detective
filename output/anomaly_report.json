@@ -1,48 +1,122 @@
-[
-    {
-        "shipment_id": "SHIP_1010",
-        "category": "Rule-Based",
-        "type": "Math Error",
-        "evidence": "FOB 500.0 != 395 * 11.42",
-        "severity": "High"
-    },
-    {
-        "shipment_id": "SHIP_1025",
-        "category": "Rule-Based",
-        "type": "Incoterm Violation",
-        "evidence": "Incoterm is CIF but freight_cost is 0",
-        "severity": "Medium"
-    },
-    {
-        "shipment_id": "SHIP_1010",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "Insufficient product information",
-        "severity": "High"
-    },
-    {
-        "shipment_id": "SHIP_1025",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "HS code 691310 is for ceramic sinks, and the product is unknown",
-        "severity": "High"
-    },
-    {
-        "shipment_id": "SHIP_1050",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "Insufficient product information to verify HS code 610910",
-        "severity": "High"
-    },
-    {
-        "shipment_id": "SHIP_1075",
-        "category": "Classification",
-        "type": "HS Code Mismatch",
-        "layer": "llm",
-        "evidence": "Insufficient product information to verify HS code accuracy",
-        "severity": "Medium"
-    }
-]
+{
+    "generated_at": "2026-02-13T20:57:01.084417+00:00",
+    "total_anomalies": 11,
+    "highest_risk_score": 80,
+    "anomalies": [
+        {
+            "shipment_id": "SHIP_1090",
+            "category": "LLM",
+            "type": "HS Code Mismatch",
+            "layer": "llm",
+            "evidence": "HS code 847130 is for automatic data processing machines, not apparel",
+            "severity": "High",
+            "risk_score": 80,
+            "priority": "P2 - High"
+        },
+        {
+            "shipment_id": "SHIP_1100",
+            "category": "LLM",
+            "type": "HS Code Mismatch",
+            "layer": "llm",
+            "evidence": "HS code 100630 is for rice, not leather handbags",
+            "severity": "High",
+            "risk_score": 80,
+            "priority": "P2 - High"
+        },
+        {
+            "shipment_id": "SHIP_1010",
+            "category": "Rule-Based",
+            "type": "Math Validation Error",
+            "layer": "rule",
+            "evidence": "FOB=999.99 \u2260 975\u00d742.84",
+            "severity": "High",
+            "impact": "Financial misstatement or invoice manipulation",
+            "risk_score": 60,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1020",
+            "category": "Rule-Based",
+            "type": "Math Validation Error",
+            "layer": "rule",
+            "evidence": "FOB=999.99 \u2260 981\u00d75.56",
+            "severity": "High",
+            "impact": "Financial misstatement or invoice manipulation",
+            "risk_score": 60,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1050",
+            "category": "Rule-Based",
+            "type": "Illegal Drawback Claim",
+            "layer": "rule",
+            "evidence": "Drawback claimed on rejected shipment",
+            "severity": "High",
+            "impact": "Regulatory violation and potential fraud",
+            "risk_score": 60,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1060",
+            "category": "Rule-Based",
+            "type": "Illegal Drawback Claim",
+            "layer": "rule",
+            "evidence": "Drawback claimed on rejected shipment",
+            "severity": "High",
+            "impact": "Regulatory violation and potential fraud",
+            "risk_score": 60,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1070",
+            "category": "Statistical",
+            "type": "Unit Price Outlier",
+            "layer": "statistical",
+            "evidence": "Z-score=6.25 | mean=27.49 | std=35.62",
+            "severity": "High",
+            "risk_score": 60,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1080",
+            "category": "Statistical",
+            "type": "Unit Price Outlier",
+            "layer": "statistical",
+            "evidence": "Z-score=-6.9 | mean=11.74 | std=1.63",
+            "severity": "High",
+            "risk_score": 60,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1110",
+            "category": "Statistical",
+            "type": "Buyer Payment Delay Anomaly",
+            "layer": "statistical",
+            "evidence": "Z-score=5.51 | buyer_avg=31.93 | std=15.98",
+            "severity": "Medium",
+            "risk_score": 55,
+            "priority": "P3 - Medium"
+        },
+        {
+            "shipment_id": "SHIP_1030",
+            "category": "Rule-Based",
+            "type": "CIF Freight Violation",
+            "layer": "rule",
+            "evidence": "CIF requires seller-paid freight but freight_cost is 0",
+            "severity": "Medium",
+            "impact": "Contractual non-compliance",
+            "risk_score": 40,
+            "priority": "P4 - Low"
+        },
+        {
+            "shipment_id": "SHIP_1120",
+            "category": "Statistical",
+            "type": "Transit Time Anomaly",
+            "layer": "statistical",
+            "evidence": "Z-score=7.65 | global_avg=27.84 | std=8.13",
+            "severity": "Medium",
+            "risk_score": 40,
+            "priority": "P4 - Low"
+        }
+    ]
+}
