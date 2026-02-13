@@ -67,8 +67,8 @@ class LLMDetector:
         product_name = row.get('product', row.get('product_description', 'Unknown'))
         hs_code = row.get('hs_code', 'Unknown')
         
-        prompt = f"Product: {product_name}, HS Code: {hs_code}. Is this correct? Return JSON: {{'is_mismatch': bool, 'reason': str, 'severity': str}}"
-        
+        product_name = row.get('product', row.get('product_description', 'Unknown'))
+        prompt = f"Product: {product_name}, HS Code: {row.get('hs_code', 'Unknown')}..."
         start_time = time.time()
         try:
             completion = self.client.chat.completions.create(
