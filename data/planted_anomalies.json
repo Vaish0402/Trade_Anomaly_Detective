@@ -2,21 +2,61 @@
     {
         "shipment_id": "SHIP_1010",
         "category": "Math Inconsistency",
-        "description": "Total FOB does not match quantity x unit price"
+        "description": "Total FOB does not equal quantity times unit_price"
     },
     {
-        "shipment_id": "SHIP_1025",
-        "category": "Compliance Risk",
-        "description": "Freight cost is zero for CIF incoterm"
+        "shipment_id": "SHIP_1020",
+        "category": "Math Inconsistency",
+        "description": "Total FOB does not equal quantity times unit_price"
+    },
+    {
+        "shipment_id": "SHIP_1030",
+        "category": "Incoterm Violation",
+        "description": "CIF shipment with zero freight cost"
+    },
+    {
+        "shipment_id": "SHIP_1040",
+        "category": "Incoterm Violation",
+        "description": "EXW shipment with seller-paid freight"
     },
     {
         "shipment_id": "SHIP_1050",
-        "category": "Price Anomaly",
-        "description": "Unit price is 50x the catalog average"
+        "category": "Drawback Fraud Risk",
+        "description": "Drawback claimed on rejected shipment"
     },
     {
-        "shipment_id": "SHIP_1075",
-        "category": "Classification Error",
-        "description": "HS Code for Laptops assigned to Cotton T-shirts"
+        "shipment_id": "SHIP_1060",
+        "category": "Drawback Fraud Risk",
+        "description": "Drawback claimed on rejected shipment"
+    },
+    {
+        "shipment_id": "SHIP_1070",
+        "category": "Price Anomaly",
+        "description": "Extreme overpricing (Z-score > 3)"
+    },
+    {
+        "shipment_id": "SHIP_1080",
+        "category": "Price Anomaly",
+        "description": "Extreme underpricing (Z-score < -3)"
+    },
+    {
+        "shipment_id": "SHIP_1090",
+        "category": "HS Code Mismatch",
+        "description": "Laptop HS code assigned to cotton T-shirt"
+    },
+    {
+        "shipment_id": "SHIP_1100",
+        "category": "HS Code Mismatch",
+        "description": "Rice HS code assigned to leather handbag"
+    },
+    {
+        "shipment_id": "SHIP_1110",
+        "category": "Buyer Behavior Anomaly",
+        "description": "Sudden payment delay spike"
+    },
+    {
+        "shipment_id": "SHIP_1120",
+        "category": "Logistics Anomaly",
+        "description": "Unusually high transit time"
     }
 ]
