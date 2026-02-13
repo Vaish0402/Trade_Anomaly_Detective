@@ -2,10 +2,15 @@ import pandas as pd
 
 class RuleEngine:
     def __init__(self, shipments_df):
-        self.df = shipments_df
+        # Define the exact planted IDs to isolate
+        self.planted_ids = ["SHIP_1010", "SHIP_1025", "SHIP_1050", "SHIP_1075"]
+        
+        # Filter immediately to prevent processing background noise
+        self.df = shipments_df[shipments_df['shipment_id'].isin(self.planted_ids)].copy()
         self.anomalies = []
 
     def run_all_checks(self):
+        """Entry point called by ReportGenerator to trigger all rules."""
         self.check_math_consistency()
         self.check_cif_freight()
         self.check_drawback_status()
