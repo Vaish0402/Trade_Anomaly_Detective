@@ -25,20 +25,40 @@ class StatisticalDetector:
         return self.anomalies
 
     def check_unit_price_outliers(self):
-        """
-        Detects significant deviations in unit price for the target IDs.
-        Matches SHIP_1050 and SHIP_1075 from the planted anomalies list.
-        """
-        # Iterating only over the 4 target rows saves significant CPU time
-        for _, row in self.df.iterrows():
-            # In your data, SHIP_1050 (250.0) and SHIP_1075 (22.5) are outliers
-            # relative to the standard range [4.90, 6.10]
-            if row['unit_price'] > 6.10 or row['unit_price'] < 4.90:
+    
+    #Detects significant deviations in unit price using Z-score method.
+
+
+    # Merge catalog avg_price
+        df_with_stats = self.df.merge(
+            self.catalog[['product_id', 'avg_price']],
+            on='product_id',
+            how='left'
+    )
+
+    # Calculate standard deviation from full shipment dataset per product
+        product_std = (
+            self.df.groupby('product_id')['unit_price']
+            .std()
+            .reset_index()
+            .rename(columns={'unit_price': 'price_std'})
+    )
+
+        df_with_stats = df_with_stats.merge(product_std, on='product_id', how='left')
+
+        for _, row in df_with_stats.iterrows():
+
+            if pd.isna(row['price_std']) or row['price_std'] == 0:
+                continue
+
+            z_score = (row['unit_price'] - row['avg_price']) / row['price_std']
+
+            if abs(z_score) > 3:
                 self.anomalies.append({
                     "shipment_id": row['shipment_id'],
                     "category": "Statistical",
                     "type": "Unit Price Outlier",
-                    "evidence": f"Value {row['unit_price']} is outside expected bounds [4.90, 6.10]",
+                    "evidence": f"Z-score {round(z_score,2)} (avg={round(row['avg_price'],2)}, std={round(row['price_std'],2)})",
                     "severity": "High",
-                    "impact": "Significant deviation in unit price may indicate fraud or inefficiency."
+                    "impact": "Significant deviation from catalog average price may indicate fraud or pricing error."
                 })
