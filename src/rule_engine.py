@@ -45,7 +45,7 @@ class RuleEngine:
                 "category": "Rule-Based",
                 "type": "Math Validation Error",
                 "layer": "rule",
-                "evidence": f"FOB={row['total_fob']} ≠ {row['quantity']}×{row['unit_price']}",
+                "evidence": f"FOB={row['total_fob']} != {row['quantity']} x {row['unit_price']}",
                 "severity": "High",
                 "impact": "Financial misstatement or invoice manipulation"
             })
